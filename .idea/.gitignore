@@ -6,5 +6,6 @@
 /dataSources.local.xml
 # Editor-based HTTP Client requests
 /httpRequests/
+# Verification details
 /src/main/java/se/joas/mysoftware/redditbot/credentials.txt
 /src/main/java/se/joas/mysoftware/redditbot/userAgent.txt
