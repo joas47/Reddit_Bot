@@ -1,1 +1,1 @@
-platform, appId, version, redditUsername
+platform,appId,version,redditUsername
