@@ -1,1 +1,1 @@
-platform,appId,version,redditUsername
+changed,appId,version,redditUsername
