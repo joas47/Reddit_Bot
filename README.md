@@ -2,7 +2,7 @@
 
 Reddit bot for posting new Youtube videos from specific channels automatically.
 
-Add two files "credentials.txt" and "userAgent.txt" to the base directory and fill in your bot's account information and the Reddit authentification respectively.
+Create two new text files "credentials.txt" and "userAgent.txt" in /src/main/java/se/joas/mysoftware/redditbot/ and fill in your bot's account information and the Reddit authentification respectively.
 
 Formatted like so:
 
