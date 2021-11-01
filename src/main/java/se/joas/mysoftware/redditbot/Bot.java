@@ -27,7 +27,6 @@ public class Bot {
     public static void main(String[] args) {
         Bot bot = new Bot();
         bot.auth(bot.readUserAgentFromFile(), bot.readCredentialsFromFile());
-
     }
 
     // Maybe useful in future
@@ -118,6 +117,7 @@ public class Bot {
         return new String[0];
     }
 
+    // TODO: make file into .properties files
     public String[] readUserAgentFromFile() {
         try {
             FileReader fileReader = new FileReader("src/main/java/se/joas/mysoftware/redditbot/userAgent.txt");
