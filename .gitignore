@@ -10,3 +10,6 @@
 /src/main/resources/youtube.properties
 /src/main/resources/credentials.properties
 /src/main/resources/userAgent.properties
+/target/classes/credentials.properties
+/target/classes/userAgent.properties
+/target/classes/youtube.properties
