@@ -14,11 +14,8 @@ import net.dean.jraw.references.SubredditReference;
 import net.dean.jraw.tree.CommentNode;
 import net.dean.jraw.tree.RootCommentNode;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -31,7 +28,7 @@ public class Bot {
 
     public static void main(String[] args) {
         Bot bot = new Bot();
-        bot.auth();
+        bot.authenticate();
 
         bot.listCommentsInThread("qiqwet");
     }
@@ -145,7 +142,7 @@ public class Bot {
         );
     }
 
-    public void auth() {
+    private void authenticate() {
         NetworkAdapter adapter = new OkHttpNetworkAdapter(readUserAgent());
         redditClient = OAuthHelper.automatic(adapter, readCredentials());
     }
