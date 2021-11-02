@@ -1,20 +1,31 @@
 # Reddit_Bot
 
-Reddit bot for posting new Youtube videos from specific channels automatically.
+Reddit bot for posting new YouTube videos from specific channels automatically.
 
-Create two new text files "credentials.txt" and "userAgent.txt" in /src/main/java/se/joas/mysoftware/redditbot/ and fill in your bot's account information and the Reddit authentification respectively.
+Create two new files: "credentials.properties" and "userAgent.properties" in
+/src/main/resources and fill in your bot's account information and the Reddit authentication respectively.
 
 Formatted like so:
 
-"credentials.txt":
+"credentials.properties":
 
-redditAccountName,redditPassword,clientId,secretId
+reddit.accountName=name
 
-"userAgent.txt":
+reddit.password=password
 
-platform,packageName,version,redditAccountName
+reddit.clientId=clientId
 
-Note: no spaces
+reddit.secretId=secretId
+
+"userAgent.properties":
+
+client=client
+
+domain=domain
+
+version=version
+
+reddit.accountName=accountName
 
 ---
 
@@ -27,3 +38,5 @@ Maven
 JUnit
 
 JRAW
+
+Youtube Data API v3
