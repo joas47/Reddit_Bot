@@ -17,16 +17,23 @@ import net.dean.jraw.tree.RootCommentNode;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 public class Bot {
 
     private static RedditClient redditClient;
+    private static final String CREDENTIALS_FILENAME = "credentials.properties";
+    private static final String USER_AGENT_FILENAME = "userAgent.properties";
 
     public static void main(String[] args) {
         Bot bot = new Bot();
-        bot.auth(bot.readUserAgentFromFile(), bot.readCredentialsFromFile());
+        bot.auth();
+
+        bot.listCommentsInThread("qiqwet");
     }
 
     // Maybe useful in future
@@ -104,38 +111,43 @@ public class Bot {
         }
     }
 
-    public String[] readCredentialsFromFile() {
+    private Credentials readCredentials() {
+        Properties properties = new Properties();
         try {
-            FileReader fileReader = new FileReader("src/main/java/se/joas/mysoftware/redditbot/credentials.txt");
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String line = bufferedReader.readLine();
-            return line.split(",");
+            InputStream in = Bot.class.getResourceAsStream("/" + CREDENTIALS_FILENAME);
+            properties.load(in);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new String[0];
+        return Credentials.script(
+                properties.getProperty("reddit.accountName"),
+                properties.getProperty("reddit.password"),
+                properties.getProperty("reddit.clientId"),
+                properties.getProperty("reddit.secretId")
+        );
     }
 
-    // TODO: make file into .properties files
-    public String[] readUserAgentFromFile() {
+    private UserAgent readUserAgent() {
+        Properties properties = new Properties();
         try {
-            FileReader fileReader = new FileReader("src/main/java/se/joas/mysoftware/redditbot/userAgent.txt");
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String line = bufferedReader.readLine();
-            return line.split(",");
+            InputStream in = Bot.class.getResourceAsStream("/" + USER_AGENT_FILENAME);
+            properties.load(in);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new String[0];
+        return new UserAgent(
+                properties.getProperty("client"),
+                properties.getProperty("domain"),
+                properties.getProperty("version"),
+                properties.getProperty("reddit.accountName")
+        );
     }
 
-    public void auth(String[] userAgents, String[] credential) {
-        UserAgent userAgent = new UserAgent(userAgents[0], userAgents[1], userAgents[2], userAgents[3]);
-        Credentials credentials = Credentials.script(credential[0], credential[1], credential[2], credential[3]);
-        NetworkAdapter adapter = new OkHttpNetworkAdapter(userAgent);
-        redditClient = OAuthHelper.automatic(adapter, credentials);
+    public void auth() {
+        NetworkAdapter adapter = new OkHttpNetworkAdapter(readUserAgent());
+        redditClient = OAuthHelper.automatic(adapter, readCredentials());
     }
 
 
