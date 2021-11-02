@@ -26,10 +26,6 @@ public class Bot {
     private static final String CREDENTIALS_FILENAME = "credentials.properties";
     private static final String USER_AGENT_FILENAME = "userAgent.properties";
 
-    public static void main(String[] args) {
-
-    }
-
     public Bot() {
         authenticate();
     }
@@ -45,6 +41,12 @@ public class Bot {
                 submissionId = s.getId();
             }
         }
+        if (!submissionId.equals("")) {
+            System.out.println("Found this: " + " " + submissionId);
+        } else {
+            System.err.println("No match found!");
+        }
+
     }
 
     public void makeCommentReplyInThread(String threadId, String commentId, String reply) {

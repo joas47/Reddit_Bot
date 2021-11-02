@@ -8,10 +8,8 @@ import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Thumbnail;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -26,10 +24,10 @@ public class Search {
     private static YouTube youtube;
     private static Bot redditBot;
 
-    public static void main(String[] args) {
+/*    public static void main(String[] args) {
         Search search = new Search();
         search.postFirstYoutubeResultToReddit("MandaloreGaming", "secrettestsite2");
-/*        Properties properties = new Properties();
+*//*        Properties properties = new Properties();
         try {
             InputStream in = Search.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
             properties.load(in);
@@ -68,22 +66,11 @@ public class Search {
             System.err.println("There was an IO error: " + e.getCause() + " : " + e.getMessage());
         } catch (Throwable t) {
             t.printStackTrace();
-        }*/
-    }
+        }*//*
+    }*/
 
-    private static String getInputQuery() throws IOException {
-
-        String inputQuery;
-
-        System.out.print("Please enter a search term: ");
-        BufferedReader bReader = new BufferedReader(new InputStreamReader(System.in));
-        inputQuery = bReader.readLine();
-
-        if (inputQuery.length() < 1) {
-            // Use the string "YouTube Developers Live" as a default.
-            inputQuery = "YouTube Developers Live";
-        }
-        return inputQuery;
+    public Search() {
+        redditBot = new Bot();
     }
 
     private static void prettyPrint(Iterator<SearchResult> iteratorSearchResults, String query) {
@@ -118,7 +105,7 @@ public class Search {
     public void postFirstYoutubeResultToReddit(String searchTerm, String subreddit) {
         try {
             YouTube.Search.List search = initYouTubeSearch();
-            redditBot = new Bot();
+            //redditBot = new Bot();
             assembleSearch(searchTerm, search);
 
             SearchListResponse searchResponse = search.execute();
@@ -136,15 +123,19 @@ public class Search {
                     // Confirm that the result represents a video. Otherwise, the
                     // item will not contain a video ID.
                     if (rId.getKind().equals("youtube#video")) {
-                        String videoId = YOUTUBE_URL + rId.getVideoId();
-                        String videoTitle = singleVideo.getSnippet().getTitle();
-                        redditBot.makeLinkPost(subreddit, videoTitle, videoId);
+                        makeRedditPost(subreddit, singleVideo, rId);
                     }
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void makeRedditPost(String subreddit, SearchResult singleVideo, ResourceId rId) {
+        String videoId = YOUTUBE_URL + rId.getVideoId();
+        String videoTitle = singleVideo.getSnippet().getTitle();
+        redditBot.makeLinkPost(subreddit, videoTitle, videoId);
     }
 
     private void assembleSearch(String searchTerm, YouTube.Search.List search) {
