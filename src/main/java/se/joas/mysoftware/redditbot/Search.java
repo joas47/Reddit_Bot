@@ -1,6 +1,5 @@
 package se.joas.mysoftware.redditbot;
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.services.youtube.YouTube;
@@ -21,13 +20,16 @@ import java.util.Properties;
 public class Search {
 
     private static final String PROPERTIES_FILENAME = "youtube.properties";
-
-    private static final long NUMBER_OF_VIDEOS_RETURNED = 25;
+    private static final long NUMBER_OF_VIDEOS_RETURNED = 1;
+    private static final String YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
     private static YouTube youtube;
+    private static Bot redditBot;
 
     public static void main(String[] args) {
-        Properties properties = new Properties();
+        Search search = new Search();
+        search.postFirstYoutubeResultToReddit("MandaloreGaming", "secrettestsite2");
+/*        Properties properties = new Properties();
         try {
             InputStream in = Search.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
             properties.load(in);
@@ -66,7 +68,7 @@ public class Search {
             System.err.println("There was an IO error: " + e.getCause() + " : " + e.getMessage());
         } catch (Throwable t) {
             t.printStackTrace();
-        }
+        }*/
     }
 
     private static String getInputQuery() throws IOException {
@@ -105,11 +107,73 @@ public class Search {
             if (rId.getKind().equals("youtube#video")) {
                 Thumbnail thumbnail = singleVideo.getSnippet().getThumbnails().getDefault();
 
-                System.out.println(" Video Id" + rId.getVideoId());
+                System.out.println(" Video Id: " + rId.getVideoId());
                 System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
                 System.out.println(" Thumbnail: " + thumbnail.getUrl());
                 System.out.println("\n-------------------------------------------------------------\n");
             }
         }
+    }
+
+    public void postFirstYoutubeResultToReddit(String searchTerm, String subreddit) {
+        try {
+            YouTube.Search.List search = initYouTubeSearch();
+            redditBot = new Bot();
+            assembleSearch(searchTerm, search);
+
+            SearchListResponse searchResponse = search.execute();
+            List<SearchResult> searchResultList = searchResponse.getItems();
+            Iterator<SearchResult> iteratorSearchResults = searchResultList.iterator();
+            if (searchResultList != null) {
+                if (!iteratorSearchResults.hasNext()) {
+                    throw new IllegalArgumentException(" There aren't any results for this query.");
+                }
+                while (iteratorSearchResults.hasNext()) {
+
+                    SearchResult singleVideo = iteratorSearchResults.next();
+                    ResourceId rId = singleVideo.getId();
+
+                    // Confirm that the result represents a video. Otherwise, the
+                    // item will not contain a video ID.
+                    if (rId.getKind().equals("youtube#video")) {
+                        String videoId = YOUTUBE_URL + rId.getVideoId();
+                        String videoTitle = singleVideo.getSnippet().getTitle();
+                        redditBot.makeLinkPost(subreddit, videoTitle, videoId);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void assembleSearch(String searchTerm, YouTube.Search.List search) {
+        String apiKey = getApiKey();
+        search.setKey(apiKey);
+        search.setQ(searchTerm);
+        search.setType(Collections.singletonList("video"));
+        search.setFields("items(id/kind,id/videoId,snippet/title,snippet/thumbnails/default/url)");
+        search.setMaxResults(NUMBER_OF_VIDEOS_RETURNED);
+    }
+
+    private String getApiKey() {
+        Properties properties = new Properties();
+        try {
+            InputStream in = Search.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
+            properties.load(in);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return properties.getProperty("youtube.apikey");
+    }
+
+    private YouTube.Search.List initYouTubeSearch() throws IOException {
+        youtube = new YouTube.Builder(Auth.HTTP_TRANSPORT, Auth.JSON_FACTORY, new HttpRequestInitializer() {
+            public void initialize(HttpRequest request) throws IOException {
+            }
+        }).setApplicationName("youtube-cmdline-search-sample").build();
+
+        return youtube.search().list(Collections.singletonList("id,snippet"));
     }
 }

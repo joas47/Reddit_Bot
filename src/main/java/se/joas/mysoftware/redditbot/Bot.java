@@ -27,14 +27,15 @@ public class Bot {
     private static final String USER_AGENT_FILENAME = "userAgent.properties";
 
     public static void main(String[] args) {
-        Bot bot = new Bot();
-        bot.authenticate();
 
-        bot.listCommentsInThread("qiqwet");
+    }
+
+    public Bot() {
+        authenticate();
     }
 
     // Maybe useful in future
-    private void findThreadInSubredditBasedOnTitle(String subredditName, String postTitle) {
+    public void findThreadInSubredditBasedOnTitle(String subredditName, String postTitle) {
         SubredditReference subreddit = redditClient.subreddit(subredditName);
         DefaultPaginator<Submission> subredditNew = subreddit.posts().sorting(SubredditSort.NEW).limit(10).build();
         Listing<Submission> submissions = subredditNew.next();
@@ -46,7 +47,7 @@ public class Bot {
         }
     }
 
-    private void makeCommentReplyInThread(String threadId, String commentId, String reply) {
+    public void makeCommentReplyInThread(String threadId, String commentId, String reply) {
         RootCommentNode rootCommentNode = redditClient.submission(threadId).comments();
         Iterator<CommentNode<PublicContribution<?>>> it = rootCommentNode.walkTree().iterator();
         while (it.hasNext()) {
@@ -58,7 +59,7 @@ public class Bot {
         }
     }
 
-    private void deleteCommentInThread(String threadId) {
+    public void deleteCommentInThread(String threadId) {
         RootCommentNode rootCommentNode = redditClient.submission(threadId).comments();
         Iterator<CommentNode<PublicContribution<?>>> it = rootCommentNode.walkTree().iterator();
         while (it.hasNext()) {
@@ -70,7 +71,7 @@ public class Bot {
         }
     }
 
-    private void makeParentCommentInThread(String threadId, String comment) {
+    public void makeParentCommentInThread(String threadId, String comment) {
         RootCommentNode rootCommentNode = redditClient.submission(threadId).comments();
         Iterator<CommentNode<PublicContribution<?>>> it = rootCommentNode.walkTree().iterator();
         while (it.hasNext()) {
@@ -82,13 +83,18 @@ public class Bot {
         }
     }
 
-    private void makeSelfPost(String subredditName, String title, String content) {
+    public void makeSelfPost(String subredditName, String title, String content) {
         SubredditReference subredditReference = redditClient.subreddit(subredditName);
         subredditReference.submit(SubmissionKind.SELF, title, content, false);
     }
 
+    public void makeLinkPost(String subredditName, String title, String url) {
+        SubredditReference subredditReference = redditClient.subreddit(subredditName);
+        subredditReference.submit(SubmissionKind.LINK, title, url, false);
+    }
+
     // Sets user flair to the first item in the list
-    private void setUserFlair(String subredditName) {
+    public void setUserFlair(String subredditName) {
         SubredditReference subreddit = redditClient.subreddit(subredditName);
         List<Flair> userFlairOptions = subreddit.userFlairOptions();
         if (!userFlairOptions.isEmpty()) {
@@ -97,7 +103,7 @@ public class Bot {
         }
     }
 
-    private void listCommentsInThread(String threadId) {
+    public void listCommentsInThread(String threadId) {
         RootCommentNode rootCommentNode = redditClient.submission(threadId).comments();
         Iterator<CommentNode<PublicContribution<?>>> it = rootCommentNode.walkTree().iterator();
         while (it.hasNext()) {
