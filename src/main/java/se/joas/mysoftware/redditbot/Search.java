@@ -27,7 +27,7 @@ public class Search {
 /*    public static void main(String[] args) {
         Search search = new Search();
         search.postFirstYoutubeResultToReddit("MandaloreGaming", "secrettestsite2");
-*//*        Properties properties = new Properties();
+        Properties properties = new Properties();
         try {
             InputStream in = Search.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
             properties.load(in);
@@ -66,7 +66,7 @@ public class Search {
             System.err.println("There was an IO error: " + e.getCause() + " : " + e.getMessage());
         } catch (Throwable t) {
             t.printStackTrace();
-        }*//*
+        }
     }*/
 
     public Search() {
@@ -100,6 +100,40 @@ public class Search {
                 System.out.println("\n-------------------------------------------------------------\n");
             }
         }
+    }
+
+    public String[] searchResult(String searchTerm) {
+        String[] searchResult = new String[2];
+        try {
+            YouTube.Search.List search = initYouTubeSearch();
+            assembleSearch(searchTerm, search);
+
+            SearchListResponse searchResponse = search.execute();
+            List<SearchResult> searchResultList = searchResponse.getItems();
+            Iterator<SearchResult> iteratorSearchResults = searchResultList.iterator();
+
+            if (searchResultList != null) {
+                if (!iteratorSearchResults.hasNext()) {
+                    throw new IllegalArgumentException(" There aren't any results for this query.");
+                }
+                while (iteratorSearchResults.hasNext()) {
+
+                    SearchResult singleVideo = iteratorSearchResults.next();
+                    ResourceId rId = singleVideo.getId();
+
+                    // Confirm that the result represents a video. Otherwise, the
+                    // item will not contain a video ID.
+                    if (rId.getKind().equals("youtube#video")) {
+                        searchResult[0] = singleVideo.getSnippet().getTitle();
+                        searchResult[1] = rId.getVideoId();
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return searchResult;
     }
 
     public void postFirstYoutubeResultToReddit(String searchTerm, String subreddit) {

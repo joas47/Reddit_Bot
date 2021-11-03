@@ -1,23 +1,23 @@
 package se.joas.mysoftware.redditbot;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Program {
 
     private final Scanner input = new Scanner(System.in);
 
-    private static Search youTubeSearch;
-    private static Bot redditBot;
+    private static Search youTubeSearch = new Search();
+    private static Bot redditBot = new Bot();
+
+    private ArrayList<String> seenVideos = new ArrayList<>();
 
     public static void main(String[] args) {
         Program program = new Program();
         program.run();
-
     }
 
     private void run() {
-        initRedditBot();
-        initYouTubeSearcher();
         runCommandLoop();
         exit();
     }
@@ -39,6 +39,7 @@ public class Program {
     private void handleCommand(String command) {
         switch (command) {
             case "youtube search":
+            case "ys":
                 youTubeSearch();
                 break;
             case "find thread":
@@ -72,17 +73,33 @@ public class Program {
 
     private void youTubeSearch() {
         String searchTerm = userInput("Search term?> ");
+        String[] searchResult = youTubeSearch.searchResult(searchTerm);
+        System.out.println("Search result: " + searchResult[0]);
+
+        if (!seenVideos.contains(searchResult[1])) {
+            System.out.println("Video not seen before!");
+            makeRedditPost(searchResult);
+        } else {
+            System.out.println("Video already seen...");
+        }
+    }
+
+    private void makeRedditPost(String[] searchResult) {
         String subreddit = userInput("Which subreddit to post in?> ");
-        youTubeSearch.postFirstYoutubeResultToReddit(searchTerm, subreddit);
+        String videoTitle = searchResult[0];
+        String videoUrl =  "https://www.youtube.com/watch?v=" + searchResult[1];
+        redditBot.makeLinkPost(subreddit, videoTitle, videoUrl);
+        seenVideos.add(searchResult[1]);
+        System.out.println("Post made in " + subreddit);
     }
 
     private void printError() {
-        System.err.println("Error: Unknown command. ");
+        System.out.println("Error: Unknown command. ");
         printCommands();
     }
 
     private void printCommands() {
-        String[] commands = {"exit", "find thread"};
+        String[] commands = {"exit", "find thread", "youtube search"};
         System.out.println("The following commands exists: ");
         for (String string : commands) {
             System.out.println("* " + string);
@@ -92,14 +109,6 @@ public class Program {
     private String readCommand() {
         System.out.print("Command?> ");
         return input.nextLine();
-    }
-
-    private void initYouTubeSearcher() {
-        youTubeSearch = new Search();
-    }
-
-    private void initRedditBot() {
-        redditBot = new Bot();
     }
 
 }
